@@ -33,20 +33,22 @@ void handleCommaText(string &line, vector<string> &store)
     vector<string> split;
     tokenize(line, delim, split);
 
-    store.push_back(split.front());
-    store.push_back(split.at(1));
+    if (split.size() == 2) {
+        store.push_back(split.front());
+        store.push_back(split.at(1));
 
-    // Since lines with commas in them have double quotes, skip to the first occurence of a double quote in this line.
-    size_t found = line.find_first_of('\"');
+        // Since lines with commas in them have double quotes, skip to the first occurence of a double quote in this line.
+        size_t found = line.find_first_of('\"');
 
-    // Exclude the double quote by skipping forward one character. Grab all characters until the ending quote AKA everything between the quotes.
-    for (int i = found + 1; i < line.find_last_of('\"'); i++)
-    {
-        commaLine += line[i];
+        // Exclude the double quote by skipping forward one character. Grab all characters until the ending quote AKA everything between the quotes.
+        for (int i = found + 1; i < line.find_last_of('\"'); i++)
+        {
+            commaLine += line[i];
+        }
+
+        // Add everything extracted between the quotes to the CSV vector.
+        store.push_back(commaLine);
     }
-
-    // Add everything extracted between the quotes to the CSV vector.
-    store.push_back(commaLine);
 }
 
 vector<string> getNextLineAndSplitIntoTokens(istream &str)
@@ -86,18 +88,20 @@ void writeTimestamp(string &timestamp)
     vector<string> timePieces;
     tokenize(timestamp, timeDelim, timePieces);
 
-    string start = timePieces.at(0);
-    start += ".000";
+    if (timePieces.size() == 2) {
+        string start = timePieces.at(0);
+        start += ".000";
 
-    string end = timePieces.at(1);
-    end += ".000";
+        string end = timePieces.at(1);
+        end += ".000";
 
-    string timeToAdd;
-    timeToAdd += start + " ";
-    timeToAdd += "--> ";
-    timeToAdd += end + "\n";
+        string timeToAdd;
+        timeToAdd += start + " ";
+        timeToAdd += "--> ";
+        timeToAdd += end + "\n";
 
-    output << timeToAdd;
+        output << timeToAdd;
+    }
 }
 
 string setOutputName(string &arg)
@@ -127,6 +131,7 @@ int main(int argc, char *argv[])
         string fileName = argv[i];
         inFile.open(fileName);
         
+        // Set the file name of the VTT to be that of the given CSV.
         string outputName = setOutputName(fileName);
         outputName += ".vtt";
         output.open(outputName);

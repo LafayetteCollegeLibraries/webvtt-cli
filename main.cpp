@@ -6,6 +6,9 @@
 
 using namespace std;
 
+ifstream inFile;
+ofstream output("output.vtt");
+
 int lineNum = 0;
 // TODO: - Figure out a way to detect invalid lines such as when there has been a line break in the text column.
 
@@ -44,10 +47,27 @@ void tokenize(std::string const &str, string &delim,
     }
 }
 
+void writeTimestamp(string &timestamp) {
+    string timeDelim = "–";
+    vector<string> timePieces;
+    tokenize(timestamp, timeDelim, timePieces);
+
+    string start = timePieces.at(0);
+    start += ".000";
+
+    string end = timePieces.at(1);
+    end += ".000";
+
+    string timeToAdd;
+    timeToAdd += start + " ";
+    timeToAdd += "--> ";
+    timeToAdd += end + "\n";
+
+    output << timeToAdd;
+}
+
 int main (int argc, char *argv[]) {
-    ifstream inFile;
-    ofstream output("output.vtt");
-    
+    vector<int> invalidLines;
 
     if (argc < 2) {
         cout << "No input files provided." << endl;
@@ -55,12 +75,13 @@ int main (int argc, char *argv[]) {
     }
 
     for (int i = 1; i < argc; i++) {
+        cout << "Converting " << argv[i] << " to a VTT..." << endl;
         inFile.open(argv[i]);
 
         if (inFile.is_open()) {
             output << "WEBVTT\n\n";
 
-            // Skip the first line of the CSV.
+            // Skip the first line containing the column names in the CSV.
             getNextLineAndSplitIntoTokens(inFile);
 
             while (!inFile.eof()) {
@@ -71,26 +92,28 @@ int main (int argc, char *argv[]) {
                 string speaker = row.at(1);
                 string text = row.at(2);
 
-                string timeDelim = "–";
-                vector<string> timePieces;
-                tokenize(timestamp, timeDelim, timePieces);
+                writeTimestamp(timestamp);
 
-                string start = timePieces.at(0);
-                start += ".000";
+                output << "<v " << speaker << ">";
 
-                string end = timePieces.at(1);
-                end += ".000";
+                // Get rid of any double quotes in the text.
+                text.erase(remove(text.begin(), text.end(), '\"'), text.end());
 
-                string timeToAdd;
-                timeToAdd += start + " ";
-                timeToAdd += "--> ";
-                timeToAdd += end + "\n";
+                output << text;
 
-                output << timeToAdd;
+                output << "</v>";
+                output << "\n\n";
             }
 
+            cout << "Done writing VTT." << endl;
             inFile.close();
             output.close();
+
+            if (!invalidLines.empty()) {
+                for (int l: invalidLines) {
+                    cout << "Invalid line " << l << endl;
+                }
+            }
         } else {
             cout << "Unable to open file." << endl;
             return EXIT_FAILURE;

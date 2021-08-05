@@ -12,19 +12,61 @@ ofstream output("output.vtt");
 int lineNum = 0;
 // TODO: - Figure out a way to detect invalid lines such as when there has been a line break in the text column.
 
-std::vector<std::string> getNextLineAndSplitIntoTokens(std::istream& str)
+void tokenize(string const &str, string &delim,
+            vector<string> &out)
 {
-    std::vector<std::string> result;
-    std::string line;
-    std::getline(str,line);
-
-    std::stringstream lineStream(line);
-    std::string cell;
-
-    while(std::getline(lineStream,cell, ','))
+    size_t start;
+    size_t end = 0;
+ 
+    while ((start = str.find_first_not_of(delim, end)) != string::npos)
     {
-        result.push_back(cell);
+        end = str.find(delim, start);
+        out.push_back(str.substr(start, end - start));
     }
+}
+
+void handleCommaText(string &line, vector<string> &store) {
+    string commaLine;
+
+    string delim = ",";
+    vector<string> split;
+    tokenize(line, delim, split);
+
+    store.push_back(split.front());
+    store.push_back(split.at(1));
+
+    // Since lines with commas in them have double quotes, skip to the first occurence of a double quote in this line.
+    size_t found = line.find_first_of('\"');
+
+    // Exclude the double quote by skipping forward one character. Grab all characters until the ending quote AKA everything between the quotes.
+    for (int i = found + 1; i < line.find_last_of('\"'); i++)
+    {
+        commaLine += line[i];
+    }
+
+    // Add everything extracted between the quotes to the CSV vector.
+    store.push_back(commaLine);
+}
+
+vector<string> getNextLineAndSplitIntoTokens(istream& str)
+{
+    vector<string> result;
+    string line;
+    getline(str,line);
+
+    stringstream lineStream(line);
+    string cell;
+
+    if (line.find('\"') == string::npos) {
+        while (getline(lineStream, cell, ','))
+        {
+            result.push_back(cell);
+        }
+    } else {
+        // This text contains double quotes, meaning there must be commas.
+        handleCommaText(line, result);
+    }
+
     // This checks for a trailing comma with no data after it.
     if (!lineStream && cell.empty())
     {
@@ -32,19 +74,6 @@ std::vector<std::string> getNextLineAndSplitIntoTokens(std::istream& str)
         result.push_back("");
     }
     return result;
-}
-
-void tokenize(std::string const &str, string &delim,
-            std::vector<std::string> &out)
-{
-    size_t start;
-    size_t end = 0;
- 
-    while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
-    {
-        end = str.find(delim, start);
-        out.push_back(str.substr(start, end - start));
-    }
 }
 
 void writeTimestamp(string &timestamp) {
@@ -88,21 +117,23 @@ int main (int argc, char *argv[]) {
                 lineNum++;
                 vector<string> row = getNextLineAndSplitIntoTokens(inFile);
 
-                string timestamp = row.at(0);
-                string speaker = row.at(1);
-                string text = row.at(2);
+                if (row.size() == 3) {
+                    string timestamp = row.at(0);
+                    string speaker = row.at(1);
+                    string text = row.at(2);
 
-                writeTimestamp(timestamp);
+                    writeTimestamp(timestamp);
 
-                output << "<v " << speaker << ">";
+                    output << "<v " << speaker << ">";
 
-                // Get rid of any double quotes in the text.
-                text.erase(remove(text.begin(), text.end(), '\"'), text.end());
+                    /* Get rid of any double quotes in the text.
+                    text.erase(remove(text.begin(), text.end(), '\"'), text.end()); */
 
-                output << text;
+                    output << text;
 
-                output << "</v>";
-                output << "\n\n";
+                    output << "</v>";
+                    output << "\n\n";
+                }
             }
 
             cout << "Done writing VTT." << endl;

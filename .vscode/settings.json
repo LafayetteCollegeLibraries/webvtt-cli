@@ -4,6 +4,8 @@
         "vector": "cpp",
         "iosfwd": "cpp",
         "iterator": "cpp",
-        "version": "cpp"
+        "version": "cpp",
+        "ostream": "cpp",
+        "string": "cpp"
     }
 }

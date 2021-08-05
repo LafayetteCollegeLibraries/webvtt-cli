@@ -6,6 +6,7 @@
         "iterator": "cpp",
         "version": "cpp",
         "ostream": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "iostream": "cpp"
     }
 }

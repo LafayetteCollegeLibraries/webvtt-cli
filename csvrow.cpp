@@ -10,7 +10,6 @@ vector<string> CSVRow::tokenize(string const &str, string &delim)
     while ((start = str.find_first_not_of(delim, end)) != string::npos)
     {
         end = str.find_first_of(delim, start);
-        // end = str.find(delim, start);
         out.push_back(str.substr(start, end - start));
     }
 

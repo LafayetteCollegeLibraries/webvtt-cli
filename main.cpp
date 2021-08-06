@@ -44,8 +44,13 @@ int main(int argc, char *argv[])
         
         // Set the file name of the VTT to be that of the given CSV.
         string outputName = setOutputName(fileName);
-        outputName += ".vtt";
-        output.open(outputName);
+
+        if (!outputName.empty()) {
+            outputName += ".vtt";
+            output.open(outputName);
+        } else {
+            cout << "Could not determine VTT file name." << endl;
+        }
 
         cout << "Writing " << fileName << " to " << outputName + "..." << endl;
 

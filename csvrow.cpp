@@ -1,15 +1,20 @@
 #include "csvrow.h"
 
-void CSVRow::tokenize(string const &str, string &delim, vector<string> &out)
+vector<string> CSVRow::tokenize(string const &str, string &delim)
 {
+    vector<string> out;
+
     size_t start;
     size_t end = 0;
 
     while ((start = str.find_first_not_of(delim, end)) != string::npos)
     {
-        end = str.find(delim, start);
+        end = str.find_first_of(delim, start);
+        // end = str.find(delim, start);
         out.push_back(str.substr(start, end - start));
     }
+
+    return out;
 }
 
 void CSVRow::handleCommaText(string &line, vector<string> &store)
@@ -17,10 +22,10 @@ void CSVRow::handleCommaText(string &line, vector<string> &store)
     string commaLine;
 
     string delim = ",";
-    vector<string> split;
-    tokenize(line, delim, split);
+    vector<string> split = tokenize(line, delim);
 
-    if (split.size() >= 2) {
+    if (split.size() >= 2)
+    {
         store.push_back(split.front());
         store.push_back(split.at(1));
 
@@ -45,27 +50,34 @@ vector<string> CSVRow::getNextLineAndSplitIntoTokens(istream &str)
     string line;
     getline(str, line);
 
-    stringstream lineStream(line);
-    string cell;
+    string delim = ",";
+    vector<string> split = tokenize(line, delim);
 
-    if (line.find('\"') == string::npos)
+    // Only do things with this line if it has at least three elements. This should skip invalid lines.
+    if (split.size() >= 3)
     {
-        while (getline(lineStream, cell, ','))
+        stringstream lineStream(line);
+        string cell;
+
+        if (line.find('\"') == string::npos)
         {
-            result.push_back(cell);
+            while (getline(lineStream, cell, ','))
+            {
+                result.push_back(cell);
+            }
         }
-    }
-    else
-    {
-        // This text contains double quotes, meaning there must be commas.
-        handleCommaText(line, result);
-    }
+        else
+        {
+            // This text contains double quotes, meaning there must be commas.
+            handleCommaText(line, result);
+        }
 
-    // This checks for a trailing comma with no data after it.
-    if (!lineStream && cell.empty())
-    {
-        // If there was a trailing comma then add an empty element.
-        result.push_back("");
+        // This checks for a trailing comma with no data after it.
+        if (!lineStream && cell.empty())
+        {
+            // If there was a trailing comma then add an empty element.
+            result.push_back("");
+        }
     }
 
     return result;
@@ -75,18 +87,17 @@ string CSVRow::makeTimestamp(string &timestamp)
 {
     string result;
 
-    string timeDelim = "–";
-    vector<string> timePieces;
-    tokenize(timestamp, timeDelim, timePieces);
+    string timeDelim = "-–—";
+    vector<string> timePieces = tokenize(timestamp, timeDelim);
 
-    if (timePieces.size() == 2) {
+    if (timePieces.size() == 2)
+    {
         string start = timePieces.at(0);
         start += ".000";
 
         string end = timePieces.at(1);
         end += ".000";
 
-        
         result += start + " ";
         result += "--> ";
         result += end + "\n";
@@ -97,13 +108,14 @@ string CSVRow::makeTimestamp(string &timestamp)
 
 CSVRow::CSVRow(istream &in)
 {
-   vector<string> row = getNextLineAndSplitIntoTokens(in);
+    vector<string> row = getNextLineAndSplitIntoTokens(in);
 
-   if (row.size() == 3) {
-       timeStamp = new string(makeTimestamp(row.front()));
-       speaker = new string(row.at(1));
-       text = new string(row.back());
-   }
+    if (row.size() == 3)
+    {
+        timeStamp = new string(makeTimestamp(row.front()));
+        speaker = new string(row.at(1));
+        text = new string(row.back());
+    }
 }
 
 CSVRow::~CSVRow()

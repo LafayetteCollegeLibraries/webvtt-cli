@@ -18,7 +18,7 @@ private:
     string makeTimestamp(string &timestamp);
     void handleCommaText(string &line, vector<string> &store);
     vector<string> getNextLineAndSplitIntoTokens(istream &str);
-    void tokenize(string const &str, string &delim, vector<string> &out);
+    vector<string> tokenize(string const &str, string &delim);
 public:
     CSVRow(istream &in);
     ~CSVRow();

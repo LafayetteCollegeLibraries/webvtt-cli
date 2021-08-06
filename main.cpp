@@ -65,13 +65,19 @@ int main(int argc, char *argv[])
             {
                 lineNum++;
 
-                CSVRow row(inFile);
-                if (row.getTimeStamp() != NULL) {
-                    output << *row.getTimeStamp();
+                CSVRow *row = new CSVRow(inFile);
+
+                string timeStamp = row->getTimeStamp();
+                string speaker = row->getSpeaker();
+                string text = row->getText();
+
+                // Only write to the file if all three column values are present.
+                if (!timeStamp.empty() && !speaker.empty() && !text.empty()) {
+                    output << timeStamp;
+                    output << "<v " << speaker << ">" << text << "</v>" << "\n\n";
                 }
-                if (row.getSpeaker() != NULL && row.getText() != NULL) {
-                    output << "<v " << *row.getSpeaker() << ">" << *row.getText() << "</v>" << "\n\n";
-                }
+
+                delete row;
             }
 
             cout << "Done writing VTT." << endl;

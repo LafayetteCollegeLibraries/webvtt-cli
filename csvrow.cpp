@@ -112,13 +112,12 @@ CSVRow::CSVRow(istream &in)
 
     if (row.size() == 3)
     {
-        timeStamp = new string(makeTimestamp(row.front()));
-        speaker = new string(row.at(1));
-        text = new string(row.back());
+        timeStamp = makeTimestamp(row.front());
+        speaker = row.at(1);
+        text = row.back();
     }
 }
 
 CSVRow::~CSVRow()
 {
-    // TODO: - Implement destructor.
 }

@@ -11,9 +11,9 @@ using namespace std;
 class CSVRow
 {
 private:
-    string *timeStamp;
-    string *speaker;
-    string *text;
+    string timeStamp;
+    string speaker;
+    string text;
 
     string makeTimestamp(string &timestamp);
     void handleCommaText(string &line, vector<string> &store);
@@ -23,9 +23,9 @@ public:
     CSVRow(istream &in);
     ~CSVRow();
 
-    string *getTimeStamp() { return timeStamp; }
-    string *getSpeaker() { return speaker; }
-    string *getText() { return text; }
+    string getTimeStamp() { return timeStamp; }
+    string getSpeaker() { return speaker; }
+    string getText() { return text; }
 };
 
 #endif

@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
                     }
                     cout << "missing timestamp, speaker, and text." << endl;
                 } else {
-                    cout << "Invalid line " << invalidLines.front() << endl;
+                    cout << "Line " << invalidLines.front() << "missing timestamp, speaker, and text." << endl;
                 }
                 
             }

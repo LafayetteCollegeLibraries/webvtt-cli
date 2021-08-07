@@ -75,6 +75,8 @@ int main(int argc, char *argv[])
                 if (!timeStamp.empty() && !speaker.empty() && !text.empty()) {
                     output << timeStamp;
                     output << "<v " << speaker << ">" << text << "</v>" << "\n\n";
+                } else {
+                    invalidLines.push_back(lineNum);
                 }
 
                 delete row;
@@ -86,10 +88,17 @@ int main(int argc, char *argv[])
 
             if (!invalidLines.empty())
             {
-                for (int l : invalidLines)
-                {
-                    cout << "Invalid line " << l << endl;
+                if (invalidLines.size() > 1) {
+                    cout << "Lines ";
+                    for (int l : invalidLines)
+                    {
+                        cout << l << ", ";
+                    }
+                    cout << "missing timestamp, speaker, and text." << endl;
+                } else {
+                    cout << "Invalid line " << invalidLines.front() << endl;
                 }
+                
             }
         }
         else

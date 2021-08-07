@@ -1,0 +1,12 @@
+#ifndef ERRCODE_H
+#define ERRCODE_H
+
+enum ErrCode
+{
+    MAXMINUTES,
+    MAXSECONDS,
+    NOTIMESEPARATOR,
+    INVALIDTIMESTART
+};
+
+#endif

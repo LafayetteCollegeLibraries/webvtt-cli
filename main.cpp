@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            cout << "Error opening file: " << strerror(errno) << endl;
+            perror("Error opening file");
             return EXIT_FAILURE;
         }
     }

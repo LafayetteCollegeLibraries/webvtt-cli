@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "vtterror.h"
+
 using namespace std;
 
 class CSVRow
@@ -14,6 +16,8 @@ private:
     string timeStamp;
     string speaker;
     string text;
+    
+    VTTError *error;
 
     string makeTimestamp(string &timestamp);
     void handleCommaText(string &line, vector<string> &store);

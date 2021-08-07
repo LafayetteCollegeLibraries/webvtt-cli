@@ -119,4 +119,5 @@ CSVRow::CSVRow(istream &in)
 
 CSVRow::~CSVRow()
 {
+    delete error;
 }

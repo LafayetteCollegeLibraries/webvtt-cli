@@ -78,6 +78,10 @@ vector<string> CSVRow::getNextLineAndSplitIntoTokens(istream &str)
             result.push_back("");
         }
     }
+    else
+    {
+        error = new VTTError(MISSINGINFO, lineNum);
+    }
 
     return result;
 }
@@ -105,8 +109,11 @@ string CSVRow::makeTimestamp(string &timestamp)
     return result;
 }
 
-CSVRow::CSVRow(istream &in)
+CSVRow::CSVRow(istream &in, int line)
 {
+    error = NULL;
+    lineNum = line;
+
     vector<string> row = getNextLineAndSplitIntoTokens(in);
 
     if (row.size() == 3)

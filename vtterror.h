@@ -7,9 +7,13 @@ class VTTError
 {
 private:
     ErrCode errCode;
+    int lineNum;
 public:
-    VTTError(ErrCode code);
+    VTTError(ErrCode code, int errLine);
     ~VTTError();
+
+    ErrCode getCode() { return errCode; }
+    int getLineNum() { return lineNum; }
 };
 
 #endif

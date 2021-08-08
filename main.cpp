@@ -6,14 +6,10 @@
 #include <sstream>
 
 #include "csvrow.h"
+#include "vtterror.h"
+#include "errcode.h"
 
 using namespace std;
-
-ifstream inFile;
-ofstream output;
-
-int lineNum = 0;
-// TODO: - Figure out a way to detect invalid lines such as when there has been a line break in the text column.
 
 string setOutputName(string &arg)
 {
@@ -29,7 +25,11 @@ string setOutputName(string &arg)
 
 int main(int argc, char *argv[])
 {
-    vector<int> invalidLines;
+    vector<VTTError> invalidLines;
+    ifstream inFile;
+    ofstream output;
+
+    int lineNum = 1;
 
     if (argc < 2)
     {
@@ -41,14 +41,17 @@ int main(int argc, char *argv[])
     {
         string fileName = argv[i];
         inFile.open(fileName);
-        
+
         // Set the file name of the VTT to be that of the given CSV.
         string outputName = setOutputName(fileName);
 
-        if (!outputName.empty()) {
+        if (!outputName.empty())
+        {
             outputName += ".vtt";
             output.open(outputName);
-        } else {
+        }
+        else
+        {
             cout << "Could not determine VTT file name." << endl;
         }
 
@@ -65,18 +68,22 @@ int main(int argc, char *argv[])
             {
                 lineNum++;
 
-                CSVRow *row = new CSVRow(inFile);
+                CSVRow *row = new CSVRow(inFile, lineNum);
 
                 string timeStamp = row->getTimeStamp();
                 string speaker = row->getSpeaker();
                 string text = row->getText();
 
+                VTTError *err = row->getError();
+                if (err != NULL)
+                    invalidLines.push_back(*err);
+
                 // Only write to the file if all three column values are present.
-                if (!timeStamp.empty() && !speaker.empty() && !text.empty()) {
+                if (!timeStamp.empty() && !speaker.empty() && !text.empty())
+                {
                     output << timeStamp;
-                    output << "<v " << speaker << ">" << text << "</v>" << "\n\n";
-                } else {
-                    invalidLines.push_back(lineNum);
+                    output << "<v " << speaker << ">" << text << "</v>"
+                           << "\n\n";
                 }
 
                 delete row;
@@ -88,17 +95,18 @@ int main(int argc, char *argv[])
 
             if (!invalidLines.empty())
             {
-                if (invalidLines.size() > 1) {
-                    cout << "Lines ";
-                    for (int l : invalidLines)
+                for (VTTError err : invalidLines)
+                {
+                    switch (err.getCode())
                     {
-                        cout << l << ", ";
+                    case MISSINGINFO:
+                        cout << "Line " << err.getLineNum() << " missing timestamp, speaker, and text." << endl;
+                        break;
+
+                    default:
+                        break;
                     }
-                    cout << "missing timestamp, speaker, and text." << endl;
-                } else {
-                    cout << "Line " << invalidLines.front() << "missing timestamp, speaker, and text." << endl;
                 }
-                
             }
         }
         else

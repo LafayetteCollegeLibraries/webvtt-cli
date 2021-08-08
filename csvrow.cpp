@@ -52,8 +52,8 @@ vector<string> CSVRow::getNextLineAndSplitIntoTokens(istream &str)
     string delim = ",";
     vector<string> split = tokenize(line, delim);
 
-    // Only do things with this line if it has at least three elements. This should skip invalid lines.
-    if (split.size() >= 3)
+    // Only do things with this line if it has at least three elements and if it starts with a timestamp. This should skip invalid lines.
+    if (split.size() >= 3 && isdigit(line[0]))
     {
         stringstream lineStream(line);
         string cell;

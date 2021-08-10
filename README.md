@@ -2,7 +2,7 @@
 This tool is meant to assist Lafayette College's Digital Scholarship Services (DSS) with video captions. It will take captions that have been written in a CSV and write them to a VTT file that can be used with a video.
 
 ## Building from source
-This tool was built with VS Code. The build task is outlined in [tasks.json](.vscode/tasks.json). To build from source, open the repo's directory in VS Code. Open main.cpp from the sidebar. Once it is open, navigate to "Terminal" &rarr; "Run Build Task..." The executable should be outputted in the same folder as the repo.
+This tool was built with VS Code. The build task is outlined in [tasks.json](.vscode/tasks.json). To build from source, open the repo's directory and enter "make" in the command line. The executable should be located in the "bin" folder.
 
 ## Running the tool
 To run this tool, enter the following into the command line:

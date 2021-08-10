@@ -126,14 +126,27 @@ CSVRow::CSVRow(istream &in, int line)
                 int minutes = stoi(row.at(1));
                 int seconds = stoi(row.at(2));
 
-                if (minutes >= 60) {
-                    // Minutes are too large.
-                    error = new VTTError(MAXMINUTES, line);
-                } else if (seconds >= 60) {
-                    // Seconds are too large.
-                    error = new VTTError(MAXSECONDS, line);
-                } else {
-                    
+                string separator = "-–—";
+                if (inLine.find_first_of(separator) != string::npos)
+                {
+                    if (minutes >= 60)
+                    {
+                        // Minutes are too large.
+                        error = new VTTError(MAXMINUTES, line);
+                    }
+                    else if (seconds >= 60)
+                    {
+                        // Seconds are too large.
+                        error = new VTTError(MAXSECONDS, line);
+                    }
+                    else
+                    {
+                    }
+                }
+                else
+                {
+                    cout << "Missing separator" << endl;
+                    error = new VTTError(NOTIMESEPARATOR, line);
                 }
             }
             else

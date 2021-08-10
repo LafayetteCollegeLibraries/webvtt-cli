@@ -23,6 +23,52 @@ string setOutputName(string &arg)
     return outputName;
 }
 
+void processRow(ifstream &inFile, ofstream &output, vector<VTTError> &invalidLines, int lineNum) {
+    CSVRow *row = new CSVRow(inFile, lineNum);
+
+    string timeStamp = row->getTimeStamp();
+    string speaker = row->getSpeaker();
+    string text = row->getText();
+
+    VTTError *err = row->getError();
+    if (err != NULL)
+        invalidLines.push_back(*err);
+
+    // Only write to the file if all three column values are present.
+    if (!timeStamp.empty() && !speaker.empty() && !text.empty())
+    {
+        output << timeStamp;
+        output << "<v " << speaker << ">" << text << "</v>"
+               << "\n\n";
+    }
+
+    delete row;
+}
+
+void processErrors(vector<VTTError> &invalidLines) {
+    for (VTTError err : invalidLines)
+    {
+        switch (err.getCode())
+        {
+        case MISSINGINFO:
+            cout << "Line " << err.getLineNum() << ": missing timestamp, speaker, and text." << endl;
+            break;
+        case NOTIMESEPARATOR:
+            cout << "Line " << err.getLineNum() << ": missing timestamp separator." << endl;
+            break;
+        case MAXMINUTES:
+            cout << "Line " << err.getLineNum() << ": minutes are greater than 60." << endl;
+            break;
+        case MAXSECONDS:
+            cout << "Line " << err.getLineNum() << ": seconds are greater than 60." << endl;
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     vector<VTTError> invalidLines;
@@ -68,25 +114,7 @@ int main(int argc, char *argv[])
             {
                 lineNum++;
 
-                CSVRow *row = new CSVRow(inFile, lineNum);
-
-                string timeStamp = row->getTimeStamp();
-                string speaker = row->getSpeaker();
-                string text = row->getText();
-
-                VTTError *err = row->getError();
-                if (err != NULL)
-                    invalidLines.push_back(*err);
-
-                // Only write to the file if all three column values are present.
-                if (!timeStamp.empty() && !speaker.empty() && !text.empty())
-                {
-                    output << timeStamp;
-                    output << "<v " << speaker << ">" << text << "</v>"
-                           << "\n\n";
-                }
-
-                delete row;
+                processRow(inFile, output, invalidLines, lineNum);
             }
 
             cout << "Done writing VTT." << endl;
@@ -95,18 +123,7 @@ int main(int argc, char *argv[])
 
             if (!invalidLines.empty())
             {
-                for (VTTError err : invalidLines)
-                {
-                    switch (err.getCode())
-                    {
-                    case MISSINGINFO:
-                        cout << "Line " << err.getLineNum() << " missing timestamp, speaker, and text." << endl;
-                        break;
-
-                    default:
-                        break;
-                    }
-                }
+                processErrors(invalidLines);
             }
         }
         else

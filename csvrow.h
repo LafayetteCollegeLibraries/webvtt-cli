@@ -23,7 +23,7 @@ private:
 
     string makeTimestamp(string &timestamp);
     void handleCommaText(string &line, vector<string> &store);
-    vector<string> getNextLineAndSplitIntoTokens(istream &str);
+    vector<string> getNextLineAndSplitIntoTokens(string &line);
     vector<string> tokenize(string const &str, string &delim);
 public:
     CSVRow(istream &in, int line);

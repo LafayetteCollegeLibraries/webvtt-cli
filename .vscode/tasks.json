@@ -2,27 +2,14 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "cppbuild",
-			"label": "C/C++: clang++ build active file",
-			"command": "/usr/bin/clang++",
-			"args": [
-				"-std=c++17",
-				"-g",
-				"*.cpp",
-				"-o",
-				"csv2vtt"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
+			"type": "shell",
+			"label": "Build",
+			"command": "make",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: /usr/bin/clang++"
+			"problemMatcher": "$gcc"
 		}
 	]
 }

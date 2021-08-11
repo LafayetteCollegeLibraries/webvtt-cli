@@ -97,13 +97,10 @@ string CSVRow::makeTimestamp(string &timestamp)
     return result;
 }
 
-CSVRow::CSVRow(istream &in, int line)
+CSVRow::CSVRow(string &inLine, int lineNum)
 {
     error = NULL;
-    lineNum = line;
-
-    string inLine;
-    getline(in, inLine);
+    this->lineNum = lineNum;
 
     string commaDelim = ",";
     vector<string> row = tokenize(inLine, commaDelim);
@@ -132,12 +129,12 @@ CSVRow::CSVRow(istream &in, int line)
                     if (minutes >= 60)
                     {
                         // Minutes are too large.
-                        error = new VTTError(MAXMINUTES, line);
+                        error = new VTTError(MAXMINUTES, lineNum);
                     }
                     else if (seconds >= 60)
                     {
                         // Seconds are too large.
-                        error = new VTTError(MAXSECONDS, line);
+                        error = new VTTError(MAXSECONDS, lineNum);
                     }
                     else
                     {
@@ -145,25 +142,25 @@ CSVRow::CSVRow(istream &in, int line)
                 }
                 else
                 {
-                    error = new VTTError(NOTIMESEPARATOR, line);
+                    error = new VTTError(NOTIMESEPARATOR, lineNum);
                 }
             }
             else
             {
                 // This is meant to handle lines that can be split in three, but still do not have the information needed.
-                error = new VTTError(MISSINGINFO, line);
+                error = new VTTError(MISSINGINFO, lineNum);
             }
         }
         else
         {
             // Throw an error because no separating colons could be found.
-            error = new VTTError(NOTIMESEPARATOR, line);
+            error = new VTTError(NOTIMESEPARATOR, lineNum);
         }
     }
     else
     {
         // The timestamp, speaker, and text are missing. Could be one of them, could be all three of them!
-        error = new VTTError(MISSINGINFO, line);
+        error = new VTTError(MISSINGINFO, lineNum);
     }
 }
 

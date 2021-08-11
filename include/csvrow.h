@@ -26,7 +26,7 @@ private:
     vector<string> getNextLineAndSplitIntoTokens(string &line);
     vector<string> tokenize(string const &str, string &delim);
 public:
-    CSVRow(istream &in, int line);
+    CSVRow(string &line, int lineNum);
     ~CSVRow();
 
     string getTimeStamp() { return timeStamp; }

@@ -23,8 +23,8 @@ string setOutputName(string &arg)
     return outputName;
 }
 
-void processRow(ifstream &inFile, ofstream &output, vector<VTTError> &invalidLines, int lineNum) {
-    CSVRow *row = new CSVRow(inFile, lineNum);
+void processRow(string &inLine, ofstream &output, vector<VTTError> &invalidLines, int lineNum) {
+    CSVRow *row = new CSVRow(inLine, lineNum);
 
     string timeStamp = row->getTimeStamp();
     string speaker = row->getSpeaker();
@@ -114,7 +114,10 @@ int main(int argc, char *argv[])
             {
                 lineNum++;
 
-                processRow(inFile, output, invalidLines, lineNum);
+                string line;
+                getline(inFile, line);
+
+                processRow(line, output, invalidLines, lineNum);
             }
 
             cout << "Done writing VTT." << endl;

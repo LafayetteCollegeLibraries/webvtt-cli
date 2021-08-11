@@ -138,6 +138,11 @@ CSVRow::CSVRow(string &inLine, int lineNum)
                     }
                     else
                     {
+                        row = getNextLineAndSplitIntoTokens(inLine);
+
+                        timeStamp = makeTimestamp(row.front());
+                        speaker = row.at(1);
+                        text = row.back();
                     }
                 }
                 else

@@ -6,11 +6,6 @@ This tool was built in VS Code. To build the source code, you will need to insta
 Replace the homebrew path with "/Applications/CMake.app/Contents/bin." \
 Open this repo in Visual Studio Code. Install the "CMake" and "CMake Tools" extensions. After doing so, open the command pallete (shift-command-P or "View" &rarr; "Command Palette..."). Type "configure" and select "CMake: Configure." Then select "CMake: Build."
 
-### Installing Google Test
-
-Google Test will be required to build the tool as well as its unit tests. Download the latest release of Google Test from
-[its repo](https://github.com/google/googletest). Unzip the file and drag the directory to the root of this repo. Name the directory "gtest."
-
 ## Running the tool
 To run this tool, enter the following into the command line:
 

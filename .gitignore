@@ -1,6 +1,5 @@
-csv2vtt
-launch.json
-bin/
+build/
+gtest/
 *.dSYM
 *.vtt
 *.csv

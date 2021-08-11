@@ -145,15 +145,19 @@ CSVRow::CSVRow(istream &in, int line)
                 }
                 else
                 {
-                    cout << "Missing separator" << endl;
                     error = new VTTError(NOTIMESEPARATOR, line);
                 }
             }
             else
             {
-                // This is meant to handle lines that have three comma values, but still do not have the information needed.
+                // This is meant to handle lines that can be split in three, but still do not have the information needed.
                 error = new VTTError(MISSINGINFO, line);
             }
+        }
+        else
+        {
+            // Throw an error because no separating colons could be found.
+            error = new VTTError(NOTIMESEPARATOR, line);
         }
     }
     else

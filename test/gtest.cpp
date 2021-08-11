@@ -3,7 +3,7 @@
 #include "../include/csvrow.h"
 
 TEST(TestError, MissingInfo) {
-    string errLine = "00:00:00–00:01:00, Neil deGrasse Tyson";
+    string errLine = "00:00:00–00:01:00,Neil deGrasse Tyson";
     CSVRow *row = new CSVRow(errLine, 1);
     vector<VTTError *> errors = row->getErrors();
 

@@ -107,63 +107,6 @@ CSVRow::CSVRow(string &inLine, int lineNum)
         vector<string> row = tokenize(inLine, commaDelim);
 
         // Do something with this line only if it has at least three elements which should correspond to timestamp, speaker, and text.
-        /* if (row.size() >= 3)
-    {
-        string timePieces = row.front();
-
-        string hourMinSecDelim = ":";
-        row = tokenize(timePieces, hourMinSecDelim);
-
-        // Checks for hh:mm:ss
-        if (row.size() >= 3)
-        {
-            // Check that the timestamp column contains a number.
-            if (row.front().find_first_of("0123456789") != string::npos)
-            {
-                // Check that minutes and seconds are not above 60.
-                int minutes = stoi(row.at(1));
-                int seconds = stoi(row.at(2));
-
-                string separator = "-–—";
-                if (inLine.find_first_of(separator) != string::npos)
-                {
-                    if (minutes >= 60)
-                    {
-                        // Minutes are too large.
-                        errors.push_back(new VTTError(MAXMINUTES, lineNum)); 
-                    }
-                    else if (seconds >= 60)
-                    {
-                        // Seconds are too large.
-                        errors.push_back(new VTTError(MAXSECONDS, lineNum));
-                    }
-                    else
-                    {
-                    }
-                }
-                else
-                {
-                    errors.push_back(new VTTError(NOTIMESEPARATOR, lineNum));
-                }
-            }
-            else
-            {
-                // This is meant to handle lines that can be split in three, but still do not have the information needed.
-                errors.push_back(new VTTError(MISSINGINFO, lineNum));
-            }
-        }
-        else
-        {
-            // Throw an error because no separating colons could be found.
-            errors.push_back(new VTTError(NOTIMESEPARATOR, lineNum)); 
-        }
-    }
-    else
-    {
-        // The timestamp, speaker, and text are missing. Could be one of them, could be all three of them!
-        errors.push_back(new VTTError(MISSINGINFO, lineNum));
-    } */
-
         if (row.size() < 3)
             errors.push_back(new VTTError(MISSINGINFO, lineNum));
 

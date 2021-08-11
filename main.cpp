@@ -30,9 +30,12 @@ void processRow(string &inLine, ofstream &output, vector<VTTError> &invalidLines
     string speaker = row->getSpeaker();
     string text = row->getText();
 
-    VTTError *err = row->getError();
-    if (err != NULL)
-        invalidLines.push_back(*err);
+    vector<VTTError *> errors = row->getErrors();
+    if (!errors.empty()) {
+        for (VTTError *err : errors) {
+            invalidLines.push_back(*err);
+        }
+    }
 
     // Only write to the file if all three column values are present.
     if (!timeStamp.empty() && !speaker.empty() && !text.empty())
@@ -61,6 +64,9 @@ void processErrors(vector<VTTError> &invalidLines) {
             break;
         case MAXSECONDS:
             cout << "Line " << err.getLineNum() << ": seconds are greater than 60." << endl;
+            break;
+        case EMPTYLINE:
+            cout << "Line " << err.getLineNum() << " is empty." << endl;
             break;
 
         default:

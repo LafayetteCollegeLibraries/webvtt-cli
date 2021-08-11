@@ -18,7 +18,7 @@ private:
     string speaker;
     string text;
     
-    VTTError *error;
+    vector<VTTError *> errors;
     int lineNum;
 
     string makeTimestamp(string &timestamp);
@@ -33,7 +33,7 @@ public:
     string getSpeaker() { return speaker; }
     string getText() { return text; }
 
-    VTTError *getError() { return error; }
+    vector<VTTError *> getErrors() { return errors; }
 };
 
 #endif

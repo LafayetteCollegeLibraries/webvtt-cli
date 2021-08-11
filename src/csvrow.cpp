@@ -99,77 +99,54 @@ string CSVRow::makeTimestamp(string &timestamp)
 
 CSVRow::CSVRow(string &inLine, int lineNum)
 {
-    error = NULL;
     this->lineNum = lineNum;
 
-    string commaDelim = ",";
-    vector<string> row = tokenize(inLine, commaDelim);
-
-    // Do something with this line only if it has at least three elements which should correspond to timestamp, speaker, and text.
-    if (row.size() >= 3)
+    if (!inLine.empty())
     {
+        string commaDelim = ",";
+        vector<string> row = tokenize(inLine, commaDelim);
+
+        // Do something with this line only if it has at least three elements which should correspond to timestamp, speaker, and text.
+        if (row.size() < 3)
+            errors.push_back(new VTTError(MISSINGINFO, lineNum));
+
         string timePieces = row.front();
 
         string hourMinSecDelim = ":";
         row = tokenize(timePieces, hourMinSecDelim);
 
-        // Checks for hh:mm:ss
-        if (row.size() >= 3)
-        {
-            // Check that the timestamp column contains a number.
-            if (row.front().find_first_of("0123456789") != string::npos)
-            {
-                // Check that minutes and seconds are not above 60.
-                int minutes = stoi(row.at(1));
-                int seconds = stoi(row.at(2));
+        if (row.size() < 3)
+            errors.push_back(new VTTError(MISSINGINFO, lineNum));
 
-                string separator = "-–—";
-                if (inLine.find_first_of(separator) != string::npos)
-                {
-                    if (minutes >= 60)
-                    {
-                        // Minutes are too large.
-                        error = new VTTError(MAXMINUTES, lineNum);
-                    }
-                    else if (seconds >= 60)
-                    {
-                        // Seconds are too large.
-                        error = new VTTError(MAXSECONDS, lineNum);
-                    }
-                    else
-                    {
-                        row = getNextLineAndSplitIntoTokens(inLine);
+        if (row.front().find_first_of("0123456789") == string::npos)
+            errors.push_back(new VTTError(MISSINGINFO, lineNum));
 
-                        timeStamp = makeTimestamp(row.front());
-                        speaker = row.at(1);
-                        text = row.back();
-                    }
-                }
-                else
-                {
-                    error = new VTTError(NOTIMESEPARATOR, lineNum);
-                }
-            }
-            else
-            {
-                // This is meant to handle lines that can be split in three, but still do not have the information needed.
-                error = new VTTError(MISSINGINFO, lineNum);
-            }
-        }
-        else
-        {
-            // Throw an error because no separating colons could be found.
-            error = new VTTError(NOTIMESEPARATOR, lineNum);
-        }
+        int minutes = stoi(row.at(1));
+        int seconds = stoi(row.at(2));
+
+        string separator = "-–—";
+
+        if (inLine.find_first_of(separator) == string::npos)
+            errors.push_back(new VTTError(NOTIMESEPARATOR, lineNum));
+
+        if (minutes >= 60)
+            errors.push_back(new VTTError(MAXMINUTES, lineNum));
+
+        if (seconds >= 60)
+            errors.push_back(new VTTError(MAXSECONDS, lineNum));
+
+        row = getNextLineAndSplitIntoTokens(inLine);
+
+        timeStamp = makeTimestamp(row.front());
+        speaker = row.at(1);
+        text = row.back();
     }
     else
     {
-        // The timestamp, speaker, and text are missing. Could be one of them, could be all three of them!
-        error = new VTTError(MISSINGINFO, lineNum);
+        errors.push_back(new VTTError(EMPTYLINE, lineNum));
     }
 }
 
 CSVRow::~CSVRow()
 {
-    delete error;
 }

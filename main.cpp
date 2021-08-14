@@ -54,7 +54,8 @@ string setOutputName(string &arg)
  * @param lineNum The line number in the CSV the input stream is currently on.
  * @return CSVRow* Return a pointer to the CSVRow instance created from this line.
  */
-CSVRow *rowFromLine(string &inLine, vector<VTTError> &invalidLines, int lineNum) {
+CSVRow *rowFromLine(string &inLine, vector<VTTError> &invalidLines, int lineNum)
+{
     CSVRow *row = new CSVRow(inLine, lineNum);
 
     // Check if there are errors on this row.
@@ -77,7 +78,8 @@ CSVRow *rowFromLine(string &inLine, vector<VTTError> &invalidLines, int lineNum)
  * @param row The row whose contents should be written to the VTT.
  * @param output The output stream that will write to the VTT.
  */
-void writeRowToFile(CSVRow *row, ofstream &output) {
+void writeRowToFile(CSVRow *row, ofstream &output)
+{
     // Get everything needed for the VTT row.
     string timeStamp = row->getTimeStamp();
     string speaker = row->getSpeaker();
@@ -87,10 +89,12 @@ void writeRowToFile(CSVRow *row, ofstream &output) {
     output << timeStamp;
 
     // Wrap speaker and text in needed tags. Write newline chars to separate the cue.
-    output << "<v " << speaker << ">" << text << "</v>" << "\n\n";
+    output << "<v " << speaker << ">" << text << "</v>"
+           << "\n\n";
 }
 
-void processErrors(vector<VTTError> &invalidLines) {
+void processErrors(vector<VTTError> &invalidLines)
+{
     for (VTTError err : invalidLines)
     {
         switch (err.getCode())
@@ -128,9 +132,11 @@ void processErrors(vector<VTTError> &invalidLines) {
  * @param pieces A vector of strings containing all of the components of a timestamp split by a colon.
  * @return int Returns the timestamp in seconds. Done so by adding the hours converted to seconds, minutes converted to seconds, and seconds.
  */
-int normalizeTimeStamp(vector<string> &pieces) {
+int normalizeTimeStamp(vector<string> &pieces)
+{
     // Even though this will only execute if the row doesn't have any errors, I want to be extra safe and make sure hh:mm:ss are there.
-    if (pieces.size() == 3) {
+    if (pieces.size() == 3)
+    {
         // Since the pieces of a timestamp are strings, convert them to ints. After this, do some math to convert to seconds.
         int hoursAsSecs = stoi(pieces.front()) * 60 * 60;
         int minsAsSecs = stoi(pieces.at(1)) * 60;
@@ -149,7 +155,8 @@ int normalizeTimeStamp(vector<string> &pieces) {
  * @return true Return true if there are no other rows to compare to
  * @return normStart2 >= normStart1 Return if the start of the current timestamp is greater than or equal to the previous timestamp.
  */
-bool startValid(CSVRow *row, vector<CSVRow *> rows) {
+bool startValid(CSVRow *row, vector<CSVRow *> rows)
+{
     if (rows.size() > 1)
     {
         // Get previous timestamp.
@@ -162,7 +169,7 @@ bool startValid(CSVRow *row, vector<CSVRow *> rows) {
 
         // Separate the start timestamps into hh:mm:ss. Store them in a map for reference.
         string pieceSeparator = ":";
-        map<string, vector<string>> pieces { {"start1", tokenize(prevTimeStamps.front(), pieceSeparator)}, {"start2", tokenize(currTimeStamps.front(), pieceSeparator)}};
+        map<string, vector<string>> pieces{{"start1", tokenize(prevTimeStamps.front(), pieceSeparator)}, {"start2", tokenize(currTimeStamps.front(), pieceSeparator)}};
 
         // Normalize the start timestamps into seconds for easier comparison.
         int normStart1 = normalizeTimeStamp(pieces["start1"]);
@@ -179,7 +186,8 @@ bool startValid(CSVRow *row, vector<CSVRow *> rows) {
  * @param row The current row of the CSV.
  * @return normEnd > normStart Return if the end timestamp is greater than the start.
  */
-bool endValid(CSVRow *row) {
+bool endValid(CSVRow *row)
+{
     string timeStampSeparator = "--> ";
     string pieceSeparator = ":";
 
@@ -196,7 +204,7 @@ bool endValid(CSVRow *row) {
 
 int main(int argc, char *argv[])
 {
-    vector <CSVRow *> rows;
+    vector<CSVRow *> rows;
     vector<VTTError> invalidLines;
     ifstream inFile;
     ofstream output;
@@ -244,7 +252,8 @@ int main(int argc, char *argv[])
                 getline(inFile, line);
 
                 CSVRow *row = rowFromLine(line, invalidLines, lineNum);
-                if (row->getErrors().empty()) {
+                if (row->getErrors().empty())
+                {
                     if (!startValid(row, rows))
                         invalidLines.push_back(VTTError(INVALIDTIMESTART, lineNum));
 
@@ -259,6 +268,12 @@ int main(int argc, char *argv[])
             cout << "Done writing VTT." << endl;
             inFile.close();
             output.close();
+
+            for (CSVRow *row : rows)
+            {
+                delete row;
+            }
+            rows.clear();
 
             if (!invalidLines.empty())
             {

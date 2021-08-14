@@ -32,6 +32,7 @@ public:
     string getTimeStamp() { return timeStamp; }
     string getSpeaker() { return speaker; }
     string getText() { return text; }
+    int getLineNum() { return lineNum; }
 
     vector<VTTError *> getErrors() { return errors; }
 };

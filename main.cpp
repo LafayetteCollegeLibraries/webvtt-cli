@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <map>
 #include <string>
 #include <sstream>
 
@@ -10,6 +11,22 @@
 #include "errcode.h"
 
 using namespace std;
+
+vector<string> tokenize(string const &str, string &delim)
+{
+    vector<string> out;
+
+    size_t start;
+    size_t end = 0;
+
+    while ((start = str.find_first_not_of(delim, end)) != string::npos)
+    {
+        end = str.find_first_of(delim, start);
+        out.push_back(str.substr(start, end - start));
+    }
+
+    return out;
+}
 
 string setOutputName(string &arg)
 {
@@ -23,29 +40,29 @@ string setOutputName(string &arg)
     return outputName;
 }
 
-void processRow(string &inLine, ofstream &output, vector<VTTError> &invalidLines, int lineNum) {
+CSVRow *rowFromLine(string &inLine, vector<VTTError> &invalidLines, int lineNum) {
     CSVRow *row = new CSVRow(inLine, lineNum);
 
-    string timeStamp = row->getTimeStamp();
-    string speaker = row->getSpeaker();
-    string text = row->getText();
-
     vector<VTTError *> errors = row->getErrors();
-    if (!errors.empty()) {
-        for (VTTError *err : errors) {
+    if (!errors.empty())
+    {
+        for (VTTError *err : errors)
+        {
             invalidLines.push_back(*err);
         }
     }
 
-    // Only write to the file if all three column values are present.
-    if (!timeStamp.empty() && !speaker.empty() && !text.empty())
-    {
-        output << timeStamp;
-        output << "<v " << speaker << ">" << text << "</v>"
-               << "\n\n";
-    }
+    return row;
+}
 
-    delete row;
+void writeRowToFile(CSVRow *row, ofstream &output) {
+    string timeStamp = row->getTimeStamp();
+    string speaker = row->getSpeaker();
+    string text = row->getText();
+
+    output << timeStamp;
+    output << "<v " << speaker << ">" << text << "</v>"
+           << "\n\n";
 }
 
 void processErrors(vector<VTTError> &invalidLines) {
@@ -68,6 +85,12 @@ void processErrors(vector<VTTError> &invalidLines) {
         case EMPTYLINE:
             cout << "Line " << err.getLineNum() << " is empty." << endl;
             break;
+        case INVALIDTIMESTART:
+            cout << "Line " << err.getLineNum() << ": start timestamp must be greater than or equal to previous timestamp." << endl;
+            break;
+        case INVALIDTIMEEND:
+            cout << "Line " << err.getLineNum() << ": end timestamp must be greater than start." << endl;
+            break;
 
         default:
             break;
@@ -75,8 +98,57 @@ void processErrors(vector<VTTError> &invalidLines) {
     }
 }
 
+int normalizeTimeStamp(vector<string> &pieces) {
+    if (pieces.size() == 3) {
+        int hoursAsSecs = stoi(pieces.front()) * 60 * 60;
+        int minsAsSecs = stoi(pieces.at(1)) * 60;
+        int secs = stoi(pieces.back());
+
+        return hoursAsSecs + minsAsSecs + secs;
+    }
+    return NULL;
+}
+
+bool startValid(CSVRow *row, vector<CSVRow *> rows) {
+    if (rows.size() > 1)
+    {
+        // Compare this row's timestamp with the previous to check if it is less than the previous.
+
+        CSVRow *prev = rows.back();
+        string timeStampSeparator = "--> ";
+
+        vector<string> prevTimeStamps = tokenize(prev->getTimeStamp(), timeStampSeparator);
+        vector<string> currTimeStamps = tokenize(row->getTimeStamp(), timeStampSeparator);
+        string pieceSeparator = ":";
+
+        map<string, vector<string>> pieces { {"start1", tokenize(prevTimeStamps.front(), pieceSeparator)}, {"start2", tokenize(currTimeStamps.front(), pieceSeparator)}};
+
+        int normStart1 = normalizeTimeStamp(pieces["start1"]);
+        int normStart2 = normalizeTimeStamp(pieces["start2"]);
+
+        return normStart2 >= normStart1;
+    }
+    return true;
+}
+
+bool endValid(CSVRow *row) {
+    string timeStampSeparator = "--> ";
+    string pieceSeparator = ":";
+
+    vector<string> timeStamps = tokenize(row->getTimeStamp(), timeStampSeparator);
+
+    vector<string> startPieces = tokenize(timeStamps.front(), pieceSeparator);
+    vector<string> endPieces = tokenize(timeStamps.back(), pieceSeparator);
+
+    int normStart = normalizeTimeStamp(startPieces);
+    int normEnd = normalizeTimeStamp(endPieces);
+
+    return normEnd > normStart;
+}
+
 int main(int argc, char *argv[])
 {
+    vector <CSVRow *> rows;
     vector<VTTError> invalidLines;
     ifstream inFile;
     ofstream output;
@@ -123,7 +195,17 @@ int main(int argc, char *argv[])
                 string line;
                 getline(inFile, line);
 
-                processRow(line, output, invalidLines, lineNum);
+                CSVRow *row = rowFromLine(line, invalidLines, lineNum);
+                if (row->getErrors().empty()) {
+                    if (!startValid(row, rows))
+                        invalidLines.push_back(VTTError(INVALIDTIMESTART, lineNum));
+
+                    if (!endValid(row))
+                        invalidLines.push_back(VTTError(INVALIDTIMEEND, lineNum));
+
+                    rows.push_back(row);
+                    writeRowToFile(row, output);
+                }
             }
 
             cout << "Done writing VTT." << endl;

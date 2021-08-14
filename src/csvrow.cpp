@@ -149,4 +149,9 @@ CSVRow::CSVRow(string &inLine, int lineNum)
 
 CSVRow::~CSVRow()
 {
+    for (VTTError *err : errors)
+    {
+        delete err;
+    }
+    errors.clear();
 }

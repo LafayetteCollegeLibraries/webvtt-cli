@@ -28,6 +28,12 @@ vector<string> tokenize(string const &str, string &delim)
     return out;
 }
 
+/**
+ * @brief Sets the file name of the VTT. Uses name after last slash in path up to .csv to make name.
+ * 
+ * @param arg 
+ * @return File name of VTT. 
+ */
 string setOutputName(string &arg)
 {
     string outputName;
@@ -40,12 +46,22 @@ string setOutputName(string &arg)
     return outputName;
 }
 
+/**
+ * @brief Forms a CSVRow pointer from a given string and line number.
+ * 
+ * @param inLine The string read from the CSV.
+ * @param invalidLines A vector of errors to be added to if there are any problems with the line.
+ * @param lineNum The line number in the CSV the input stream is currently on.
+ * @return CSVRow* Return a pointer to the CSVRow instance created from this line.
+ */
 CSVRow *rowFromLine(string &inLine, vector<VTTError> &invalidLines, int lineNum) {
     CSVRow *row = new CSVRow(inLine, lineNum);
 
+    // Check if there are errors on this row.
     vector<VTTError *> errors = row->getErrors();
     if (!errors.empty())
     {
+        // Loop through the errors on this row and add them to the vector.
         for (VTTError *err : errors)
         {
             invalidLines.push_back(*err);
@@ -55,14 +71,23 @@ CSVRow *rowFromLine(string &inLine, vector<VTTError> &invalidLines, int lineNum)
     return row;
 }
 
+/**
+ * @brief Writes the contents of a CSV row to the VTT.
+ * 
+ * @param row The row whose contents should be written to the VTT.
+ * @param output The output stream that will write to the VTT.
+ */
 void writeRowToFile(CSVRow *row, ofstream &output) {
+    // Get everything needed for the VTT row.
     string timeStamp = row->getTimeStamp();
     string speaker = row->getSpeaker();
     string text = row->getText();
 
+    // Begin by writing the timestamp since that always appears first in a WebVTT cue.
     output << timeStamp;
-    output << "<v " << speaker << ">" << text << "</v>"
-           << "\n\n";
+
+    // Wrap speaker and text in needed tags. Write newline chars to separate the cue.
+    output << "<v " << speaker << ">" << text << "</v>" << "\n\n";
 }
 
 void processErrors(vector<VTTError> &invalidLines) {
@@ -86,7 +111,7 @@ void processErrors(vector<VTTError> &invalidLines) {
             cout << "Line " << err.getLineNum() << " is empty." << endl;
             break;
         case INVALIDTIMESTART:
-            cout << "Line " << err.getLineNum() << ": start timestamp must be greater than or equal to previous timestamp." << endl;
+            cout << "Line " << err.getLineNum() << ": start timestamp must be greater than or equal to start of previous cue." << endl;
             break;
         case INVALIDTIMEEND:
             cout << "Line " << err.getLineNum() << ": end timestamp must be greater than start." << endl;
@@ -97,9 +122,16 @@ void processErrors(vector<VTTError> &invalidLines) {
         }
     }
 }
-
+/**
+ * @brief Converts all pieces of a timestamp into seconds for comparison.
+ * 
+ * @param pieces A vector of strings containing all of the components of a timestamp split by a colon.
+ * @return int Returns the timestamp in seconds. Done so by adding the hours converted to seconds, minutes converted to seconds, and seconds.
+ */
 int normalizeTimeStamp(vector<string> &pieces) {
+    // Even though this will only execute if the row doesn't have any errors, I want to be extra safe and make sure hh:mm:ss are there.
     if (pieces.size() == 3) {
+        // Since the pieces of a timestamp are strings, convert them to ints. After this, do some math to convert to seconds.
         int hoursAsSecs = stoi(pieces.front()) * 60 * 60;
         int minsAsSecs = stoi(pieces.at(1)) * 60;
         int secs = stoi(pieces.back());
@@ -109,20 +141,30 @@ int normalizeTimeStamp(vector<string> &pieces) {
     return NULL;
 }
 
+/**
+ * @brief Checks if the start timestamp is valid. A start will be valid only if it is greater than or equal to the start of the previous cue.
+ * 
+ * @param row The row of the CSV.
+ * @param rows The vector of rows used to compare with the previous row.
+ * @return true Return true if there are no other rows to compare to
+ * @return normStart2 >= normStart1 Return if the start of the current timestamp is greater than or equal to the previous timestamp.
+ */
 bool startValid(CSVRow *row, vector<CSVRow *> rows) {
     if (rows.size() > 1)
     {
-        // Compare this row's timestamp with the previous to check if it is less than the previous.
-
+        // Get previous timestamp.
         CSVRow *prev = rows.back();
         string timeStampSeparator = "--> ";
 
+        // Separate start and end timestamps of previous and current row.
         vector<string> prevTimeStamps = tokenize(prev->getTimeStamp(), timeStampSeparator);
         vector<string> currTimeStamps = tokenize(row->getTimeStamp(), timeStampSeparator);
-        string pieceSeparator = ":";
 
+        // Separate the start timestamps into hh:mm:ss. Store them in a map for reference.
+        string pieceSeparator = ":";
         map<string, vector<string>> pieces { {"start1", tokenize(prevTimeStamps.front(), pieceSeparator)}, {"start2", tokenize(currTimeStamps.front(), pieceSeparator)}};
 
+        // Normalize the start timestamps into seconds for easier comparison.
         int normStart1 = normalizeTimeStamp(pieces["start1"]);
         int normStart2 = normalizeTimeStamp(pieces["start2"]);
 
@@ -131,6 +173,12 @@ bool startValid(CSVRow *row, vector<CSVRow *> rows) {
     return true;
 }
 
+/**
+ * @brief Checks if an end timestamp is greater than the start timestamp of a row.
+ * 
+ * @param row The current row of the CSV.
+ * @return normEnd > normStart Return if the end timestamp is greater than the start.
+ */
 bool endValid(CSVRow *row) {
     string timeStampSeparator = "--> ";
     string pieceSeparator = ":";

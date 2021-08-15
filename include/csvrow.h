@@ -25,6 +25,8 @@ private:
     void handleCommaText(string &line, vector<string> &store);
     vector<string> getNextLineAndSplitIntoTokens(string &line);
     vector<string> tokenize(string const &str, string &delim);
+    bool missingInfo(vector<string> &row, vector<VTTError *> &errors);
+    bool maxMinSec(int minutes, int seconds);
 public:
     CSVRow(string &line, int lineNum);
     ~CSVRow();

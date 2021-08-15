@@ -106,10 +106,10 @@ void processErrors(vector<VTTError> &invalidLines)
             cout << "Line " << err.getLineNum() << ": missing timestamp separator." << endl;
             break;
         case MAXMINUTES:
-            cout << "Line " << err.getLineNum() << ": minutes are greater than 60." << endl;
+            cout << "Line " << err.getLineNum() << ": minutes must be less than 60." << endl;
             break;
         case MAXSECONDS:
-            cout << "Line " << err.getLineNum() << ": seconds are greater than 60." << endl;
+            cout << "Line " << err.getLineNum() << ": seconds must be less than 60." << endl;
             break;
         case EMPTYLINE:
             cout << "Line " << err.getLineNum() << " is empty." << endl;

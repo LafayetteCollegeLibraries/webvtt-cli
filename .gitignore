@@ -1,5 +1,8 @@
 build/
 gtest/
+GPATH
+GRTAGS
+GTAGS
 *.dSYM
 *.vtt
 *.csv

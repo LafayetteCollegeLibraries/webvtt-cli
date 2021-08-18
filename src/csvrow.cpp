@@ -73,7 +73,7 @@ vector<string> CSVRow::getNextLineAndSplitIntoTokens(string &line)
     string cell;
 
     // Check that there are no double quotes in this row. If there is not one, handle this row normally.
-    if (line.find('\"') == string::npos)
+    if (line.find("\"") == string::npos)
     {
         while (getline(lineStream, cell, ','))
         {

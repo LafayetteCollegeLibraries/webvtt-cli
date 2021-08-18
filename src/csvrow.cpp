@@ -66,7 +66,8 @@ vector<string> CSVRow::getNextLineAndSplitIntoTokens(string &line)
 {
     vector<string> result;
 
-    /* Only do things with this line if it has at least three elements and if it starts with a timestamp. 
+    /* 
+    Only do things with this line if it has at least three elements and if it starts with a timestamp. 
     This should skip invalid lines.
     */
     stringstream lineStream(line);
@@ -77,20 +78,19 @@ vector<string> CSVRow::getNextLineAndSplitIntoTokens(string &line)
     {
         while (getline(lineStream, cell, ','))
         {
-            result.push_back(cell);
+            /*
+            Handle trailing commas with no data after them by checking if a split string only contains white spaces.
+            This will make it so that only parts after a comma that actually contain text will be written to the VTT. 
+            */
+            bool whiteSpacesOnly = all_of(cell.begin(), cell.end(), ::isspace);
+            if (!whiteSpacesOnly)
+                result.push_back(cell);
         }
     }
     else
     {
         // This text contains double quotes, meaning there must be commas in the caption text.
         handleCommaText(line, result);
-    }
-
-    // This checks for a trailing comma with no data after it.
-    if (!lineStream && cell.empty())
-    {
-        // If there was a trailing comma then add an empty element.
-        result.push_back("");
     }
 
     return result;

@@ -5,6 +5,8 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 
 #include "vtterror.h"
 #include "errcode.h"

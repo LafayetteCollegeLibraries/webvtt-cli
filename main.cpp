@@ -132,7 +132,7 @@ void processErrors(vector<VTTError> &invalidLines)
  * @param pieces A vector of strings containing all of the components of a timestamp split by a colon.
  * @return int Returns the timestamp in seconds. Done so by adding the hours converted to seconds, minutes converted to seconds, and seconds.
  */
-int normalizeTimeStamp(vector<string> &pieces)
+int timeStampToSeconds(vector<string> &pieces)
 {
     // Even though this will only execute if the row doesn't have any errors, I want to be extra safe and make sure hh:mm:ss are there.
     if (pieces.size() == 3)
@@ -172,8 +172,8 @@ bool startValid(CSVRow *row, vector<CSVRow *> rows)
         map<string, vector<string>> pieces{{"start1", tokenize(prevTimeStamps.front(), pieceSeparator)}, {"start2", tokenize(currTimeStamps.front(), pieceSeparator)}};
 
         // Normalize the start timestamps into seconds for easier comparison.
-        int normStart1 = normalizeTimeStamp(pieces["start1"]);
-        int normStart2 = normalizeTimeStamp(pieces["start2"]);
+        int normStart1 = timeStampToSeconds(pieces["start1"]);
+        int normStart2 = timeStampToSeconds(pieces["start2"]);
 
         return normStart2 >= normStart1;
     }
@@ -196,8 +196,8 @@ bool endValid(CSVRow *row)
     vector<string> startPieces = tokenize(timeStamps.front(), pieceSeparator);
     vector<string> endPieces = tokenize(timeStamps.back(), pieceSeparator);
 
-    int normStart = normalizeTimeStamp(startPieces);
-    int normEnd = normalizeTimeStamp(endPieces);
+    int normStart = timeStampToSeconds(startPieces);
+    int normEnd = timeStampToSeconds(endPieces);
 
     return normEnd > normStart;
 }

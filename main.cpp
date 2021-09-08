@@ -157,7 +157,8 @@ int timeStampToSeconds(vector<string> &pieces)
  */
 bool startValid(CSVRow *row, vector<CSVRow *> rows)
 {
-    if (rows.size() > 1)
+    // Execute only if a previous row exists in the vector.
+    if (rows.size() > 0)
     {
         // Get previous timestamp.
         CSVRow *prev = rows.back();

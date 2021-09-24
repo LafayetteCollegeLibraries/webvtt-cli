@@ -4,6 +4,16 @@ gtest/
 GPATH
 GRTAGS
 GTAGS
+lib/
+test/
 *.dSYM
 *.vtt
 *.csv
+*.cmake
+*.a
+CMakeCache.txt
+Makefile
+install_manifest.txt
+_CPack_Packages/
+_deps/
+CMakeFiles/

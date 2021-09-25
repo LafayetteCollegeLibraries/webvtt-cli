@@ -1,3 +1,5 @@
+set(CMAKE_INSTALL_PREFIX /usr/local)
+
 cmake_minimum_required(VERSION 3.0.0)
 project(csv2vtt VERSION 0.1.0)
 include_directories(include)

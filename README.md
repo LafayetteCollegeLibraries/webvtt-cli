@@ -10,7 +10,7 @@ Open this repo in Visual Studio Code. Install the "CMake" and "CMake Tools" exte
 To run this tool, enter the following into the command line:
 
 ```
-./csv2vtt fileName(s)
+csv2vtt fileName(s)
 ```
 
 You can give the tool as many CSVs as you want, they will all be written to separate VTTs. You will know that a VTT has been written to when the message "Done writing VTT" appears. If there are any problems with your CSV, they will be printed out.
